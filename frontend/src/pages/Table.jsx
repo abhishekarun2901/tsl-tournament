@@ -67,11 +67,11 @@ function Table() {
                     </div>
                     <div className="text-center p-3 bg-white/10 rounded-xl">
                         <div className="text-2xl font-bold text-primary-400">3rd</div>
-                        <div className="text-gray-400">Head-to-Head</div>
+                        <div className="text-gray-400">Goals For</div>
                     </div>
                     <div className="text-center p-3 bg-white/10 rounded-xl">
                         <div className="text-2xl font-bold text-primary-400">4th</div>
-                        <div className="text-gray-400">Goals For</div>
+                        <div className="text-gray-400">Head-to-Head</div>
                     </div>
                 </div>
             </div>
