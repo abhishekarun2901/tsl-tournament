@@ -22,13 +22,22 @@ const playerSchema = new mongoose.Schema({
     goals: {
         type: Number,
         default: 0
+    },
+    cleanSheets: {
+        type: Number,
+        default: 0
+    },
+    isGoalkeeper: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
 });
 
-// Index for efficient team-based queries
+// Index for efficient queries
 playerSchema.index({ teamId: 1 });
 playerSchema.index({ goals: -1 });
+playerSchema.index({ cleanSheets: -1 });
 
 export default mongoose.model('Player', playerSchema);

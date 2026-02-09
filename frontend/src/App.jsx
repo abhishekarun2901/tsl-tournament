@@ -6,7 +6,7 @@ import Fixtures from './pages/Fixtures';
 import Table from './pages/Table';
 import Teams from './pages/Teams';
 import TeamDetail from './pages/TeamDetail';
-import TopScorers from './pages/TopScorers';
+import Awards from './pages/Awards';
 import UpdateTournament from './pages/UpdateTournament';
 
 function App() {
@@ -20,7 +20,8 @@ function App() {
                     <Route path="/table" element={<Table />} />
                     <Route path="/teams" element={<Teams />} />
                     <Route path="/teams/:id" element={<TeamDetail />} />
-                    <Route path="/top-scorers" element={<TopScorers />} />
+                    <Route path="/awards" element={<Awards />} />
+                    <Route path="/top-scorers" element={<Awards />} /> {/* Redirect for old URL */}
                     <Route path="/update-tournament" element={<UpdateTournament />} />
                 </Routes>
             </main>

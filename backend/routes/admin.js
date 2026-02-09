@@ -1,5 +1,5 @@
 import express from 'express';
-import { Team, Player, Match, Standing } from '../models/index.js';
+import { Team, Player, Match, Standing, Settings } from '../models/index.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
@@ -11,6 +11,43 @@ router.use(authMiddleware);
 router.post('/verify', (req, res) => {
     res.json({ success: true, message: 'Secret key verified' });
 });
+
+// =====================
+// SETTINGS ENDPOINTS
+// =====================
+
+// GET /api/admin/settings - Get all settings
+router.get('/settings', async (req, res) => {
+    try {
+        const settings = await Settings.getSettings();
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch settings', details: error.message });
+    }
+});
+
+// PUT /api/admin/settings - Update settings
+router.put('/settings', async (req, res) => {
+    try {
+        const { showGoldenBoot, showGoldenGlove } = req.body;
+
+        if (showGoldenBoot !== undefined) {
+            await Settings.setSetting('showGoldenBoot', showGoldenBoot);
+        }
+        if (showGoldenGlove !== undefined) {
+            await Settings.setSetting('showGoldenGlove', showGoldenGlove);
+        }
+
+        const settings = await Settings.getSettings();
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update settings', details: error.message });
+    }
+});
+
+// =====================
+// TEAM ENDPOINTS
+// =====================
 
 // POST /api/admin/team - Add a new team
 router.post('/team', async (req, res) => {
@@ -51,12 +88,16 @@ router.put('/team/:id', async (req, res) => {
     }
 });
 
+// =====================
+// PLAYER ENDPOINTS
+// =====================
+
 // POST /api/admin/player - Add a new player
 router.post('/player', async (req, res) => {
     try {
-        const { name, teamId, position, jerseyNumber } = req.body;
+        const { name, teamId, department, jerseyNumber, isGoalkeeper } = req.body;
 
-        const player = new Player({ name, teamId, position, jerseyNumber });
+        const player = new Player({ name, teamId, department, jerseyNumber, isGoalkeeper });
         await player.save();
 
         res.status(201).json(player);
@@ -68,11 +109,11 @@ router.post('/player', async (req, res) => {
 // PUT /api/admin/player/:id - Update a player
 router.put('/player/:id', async (req, res) => {
     try {
-        const { name, teamId, position, jerseyNumber, goals } = req.body;
+        const { name, teamId, department, jerseyNumber, goals, cleanSheets, isGoalkeeper } = req.body;
 
         const player = await Player.findByIdAndUpdate(
             req.params.id,
-            { name, teamId, position, jerseyNumber, goals },
+            { name, teamId, department, jerseyNumber, goals, cleanSheets, isGoalkeeper },
             { new: true }
         );
 
@@ -86,16 +127,42 @@ router.put('/player/:id', async (req, res) => {
     }
 });
 
+// PATCH /api/admin/player/:id/cleansheet - Add clean sheet to goalkeeper
+router.patch('/player/:id/cleansheet', async (req, res) => {
+    try {
+        const { increment } = req.body; // +1 or -1
+
+        const player = await Player.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { cleanSheets: increment || 1 } },
+            { new: true }
+        ).populate('teamId', 'name logo');
+
+        if (!player) {
+            return res.status(404).json({ error: 'Player not found' });
+        }
+
+        res.json(player);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update clean sheets', details: error.message });
+    }
+});
+
+// =====================
+// MATCH ENDPOINTS
+// =====================
+
 // POST /api/admin/match - Create a new match
 router.post('/match', async (req, res) => {
     try {
-        const { teamA, teamB, matchTime, matchday } = req.body;
+        const { teamA, teamB, matchTime, matchday, matchNumber } = req.body;
 
         const match = new Match({
             teamA,
             teamB,
             matchTime,
             matchday,
+            matchNumber,
             status: 'upcoming',
             scoreA: 0,
             scoreB: 0
@@ -109,6 +176,46 @@ router.post('/match', async (req, res) => {
         res.status(201).json(populatedMatch);
     } catch (error) {
         res.status(500).json({ error: 'Failed to create match', details: error.message });
+    }
+});
+
+// PUT /api/admin/match/:id - Update entire match (teams, time, number)
+router.put('/match/:id', async (req, res) => {
+    try {
+        const { teamA, teamB, matchTime, matchday, matchNumber } = req.body;
+
+        const match = await Match.findByIdAndUpdate(
+            req.params.id,
+            { teamA, teamB, matchTime, matchday, matchNumber },
+            { new: true }
+        )
+            .populate('teamA', 'name logo')
+            .populate('teamB', 'name logo')
+            .populate('goalscorers.playerId', 'name')
+            .populate('goalscorers.teamId', 'name');
+
+        if (!match) {
+            return res.status(404).json({ error: 'Match not found' });
+        }
+
+        res.json(match);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update match', details: error.message });
+    }
+});
+
+// DELETE /api/admin/match/:id - Delete a match
+router.delete('/match/:id', async (req, res) => {
+    try {
+        const match = await Match.findByIdAndDelete(req.params.id);
+
+        if (!match) {
+            return res.status(404).json({ error: 'Match not found' });
+        }
+
+        res.json({ success: true, message: 'Match deleted' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete match', details: error.message });
     }
 });
 
@@ -222,19 +329,14 @@ router.post('/match/:id/goal', async (req, res) => {
 // DELETE /api/admin/match/:id/goal - Remove a goal
 router.delete('/match/:id/goal', async (req, res) => {
     try {
-        const { playerId, minute } = req.body;
+        const { goalIndex } = req.body;
 
         const match = await Match.findById(req.params.id);
         if (!match) {
             return res.status(404).json({ error: 'Match not found' });
         }
 
-        // Find and remove the goal
-        const goalIndex = match.goalscorers.findIndex(
-            g => g.playerId.toString() === playerId && g.minute === minute
-        );
-
-        if (goalIndex === -1) {
+        if (goalIndex < 0 || goalIndex >= match.goalscorers.length) {
             return res.status(404).json({ error: 'Goal not found' });
         }
 
@@ -247,11 +349,18 @@ router.delete('/match/:id/goal', async (req, res) => {
             match.scoreB = Math.max(0, match.scoreB - 1);
         }
 
+        // Remove goal and update player stats
+        const playerId = goal.playerId;
         match.goalscorers.splice(goalIndex, 1);
         await match.save();
 
         // Update player's goal count
         await Player.findByIdAndUpdate(playerId, { $inc: { goals: -1 } });
+
+        // Recalculate standings if match is finished
+        if (match.status === 'finished') {
+            await recalculateStandings();
+        }
 
         const populatedMatch = await Match.findById(match._id)
             .populate('teamA', 'name logo')
@@ -288,6 +397,26 @@ router.post('/match/:id/card', async (req, res) => {
         res.json(populatedMatch);
     } catch (error) {
         res.status(500).json({ error: 'Failed to add card', details: error.message });
+    }
+});
+
+// PATCH /api/admin/matches/reorder - Reorder matches
+router.patch('/matches/reorder', async (req, res) => {
+    try {
+        const { matchOrders } = req.body; // Array of { matchId, matchNumber }
+
+        for (const order of matchOrders) {
+            await Match.findByIdAndUpdate(order.matchId, { matchNumber: order.matchNumber });
+        }
+
+        const matches = await Match.find()
+            .populate('teamA', 'name logo')
+            .populate('teamB', 'name logo')
+            .sort({ matchNumber: 1 });
+
+        res.json(matches);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to reorder matches', details: error.message });
     }
 });
 

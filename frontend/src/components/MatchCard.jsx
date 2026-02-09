@@ -29,13 +29,13 @@ function MatchCard({ match, showDetails = true }) {
                 return <LiveIndicator minute={match.currentMinute} />;
             case 'finished':
                 return (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs sm:text-sm font-medium">
                         Full Time
                     </span>
                 );
             default:
                 return (
-                    <span className="px-3 py-1 bg-secondary-50 text-secondary-600 rounded-full text-sm font-medium">
+                    <span className="px-3 py-1 bg-secondary-50 text-secondary-600 rounded-full text-xs sm:text-sm font-medium">
                         {formatTime(match.matchTime)}
                     </span>
                 );
@@ -55,7 +55,7 @@ function MatchCard({ match, showDetails = true }) {
 
     return (
         <div
-            className={`card p-4 hover:shadow-card-hover transition-all duration-300 ${match.status === 'live' ? 'ring-2 ring-red-200 bg-red-50/30' : ''
+            className={`card p-3 sm:p-4 hover:shadow-card-hover transition-all duration-300 ${match.status === 'live' ? 'ring-2 ring-red-200 bg-red-50/30' : ''
                 }`}
         >
             {/* Match Date for upcoming */}
@@ -65,27 +65,29 @@ function MatchCard({ match, showDetails = true }) {
                 </div>
             )}
 
-            {/* Main Match Display */}
-            <div className="flex items-center justify-between">
+            {/* Main Match Display - Mobile Optimized */}
+            <div className="flex items-center justify-between gap-2">
                 {/* Team A */}
-                <div className="flex-1 flex items-center gap-3">
-                    <TeamLogo team={match.teamA} size="md" />
-                    <span className="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                        {match.teamA?.name}
-                    </span>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <TeamLogo team={match.teamA} size="sm" className="flex-shrink-0" />
+                        <span className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base truncate">
+                            {match.teamA?.name}
+                        </span>
+                    </div>
                 </div>
 
-                {/* Score */}
-                <div className="flex-shrink-0 px-4 sm:px-8 text-center">
+                {/* Score - Always visible */}
+                <div className="flex-shrink-0 px-2 sm:px-4 md:px-6 text-center">
                     {match.status === 'upcoming' ? (
-                        <span className="text-2xl font-bold text-gray-400">vs</span>
+                        <span className="text-lg sm:text-xl md:text-2xl font-bold text-gray-400">vs</span>
                     ) : (
-                        <div className="score-display">
-                            <span className={match.scoreA > match.scoreB ? 'text-primary-600' : ''}>
+                        <div className="flex items-center gap-1 sm:gap-2">
+                            <span className={`text-xl sm:text-2xl md:text-3xl font-extrabold ${match.scoreA > match.scoreB ? 'text-primary-600' : 'text-gray-900'}`}>
                                 {match.scoreA}
                             </span>
-                            <span className="text-gray-300 mx-2">—</span>
-                            <span className={match.scoreB > match.scoreA ? 'text-primary-600' : ''}>
+                            <span className="text-gray-300 text-lg sm:text-xl">—</span>
+                            <span className={`text-xl sm:text-2xl md:text-3xl font-extrabold ${match.scoreB > match.scoreA ? 'text-primary-600' : 'text-gray-900'}`}>
                                 {match.scoreB}
                             </span>
                         </div>
@@ -93,16 +95,18 @@ function MatchCard({ match, showDetails = true }) {
                 </div>
 
                 {/* Team B */}
-                <div className="flex-1 flex items-center justify-end gap-3">
-                    <span className="font-semibold text-gray-900 text-sm sm:text-base truncate text-right">
-                        {match.teamB?.name}
-                    </span>
-                    <TeamLogo team={match.teamB} size="md" />
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-end gap-2 sm:gap-3">
+                        <span className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base truncate text-right">
+                            {match.teamB?.name}
+                        </span>
+                        <TeamLogo team={match.teamB} size="sm" className="flex-shrink-0" />
+                    </div>
                 </div>
             </div>
 
             {/* Status Badge */}
-            <div className="flex justify-center mt-3">
+            <div className="flex justify-center mt-2 sm:mt-3">
                 {getStatusBadge()}
             </div>
 
@@ -110,7 +114,7 @@ function MatchCard({ match, showDetails = true }) {
             {showDetails && (hasGoals || hasCards) && (
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="w-full mt-3 pt-3 border-t border-surface-200 text-sm text-gray-500 hover:text-gray-700 flex items-center justify-center gap-1"
+                    className="w-full mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-surface-200 text-xs sm:text-sm text-gray-500 hover:text-gray-700 flex items-center justify-center gap-1"
                 >
                     {expanded ? 'Hide details' : 'Show goal scorers'}
                     <svg
@@ -126,14 +130,14 @@ function MatchCard({ match, showDetails = true }) {
 
             {/* Expanded Details */}
             {expanded && (
-                <div className="mt-3 pt-3 border-t border-surface-200 animate-slide-up">
-                    <div className="grid grid-cols-2 gap-4">
+                <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-surface-200 animate-slide-up">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4">
                         {/* Team A Scorers */}
                         <div className="space-y-1">
                             {teamAGoals.map((goal, idx) => (
-                                <div key={idx} className="flex items-center gap-2 text-sm">
+                                <div key={idx} className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                                     <span>⚽</span>
-                                    <span className="text-gray-700">{goal.playerId?.name || 'Unknown'}</span>
+                                    <span className="text-gray-700 truncate">{goal.playerId?.name || 'Unknown'}</span>
                                     <span className="text-gray-400">{goal.minute}'</span>
                                 </div>
                             ))}
@@ -142,9 +146,9 @@ function MatchCard({ match, showDetails = true }) {
                         {/* Team B Scorers */}
                         <div className="space-y-1 text-right">
                             {teamBGoals.map((goal, idx) => (
-                                <div key={idx} className="flex items-center justify-end gap-2 text-sm">
+                                <div key={idx} className="flex items-center justify-end gap-1 sm:gap-2 text-xs sm:text-sm">
                                     <span className="text-gray-400">{goal.minute}'</span>
-                                    <span className="text-gray-700">{goal.playerId?.name || 'Unknown'}</span>
+                                    <span className="text-gray-700 truncate">{goal.playerId?.name || 'Unknown'}</span>
                                     <span>⚽</span>
                                 </div>
                             ))}
@@ -155,11 +159,11 @@ function MatchCard({ match, showDetails = true }) {
                     {hasCards && (
                         <div className="mt-2 pt-2 border-t border-surface-100">
                             {match.cards.map((card, idx) => (
-                                <div key={idx} className="flex items-center gap-2 text-sm text-gray-600">
+                                <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                                     <span>
                                         {card.cardType === 'red' ? '🟥' : '🟨'}
                                     </span>
-                                    <span>{card.playerId?.name || 'Unknown'}</span>
+                                    <span className="truncate">{card.playerId?.name || 'Unknown'}</span>
                                     <span className="text-gray-400">{card.minute}'</span>
                                 </div>
                             ))}

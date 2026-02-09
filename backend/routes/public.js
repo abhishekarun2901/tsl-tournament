@@ -1,7 +1,17 @@
 import express from 'express';
-import { Team, Player, Match, Standing } from '../models/index.js';
+import { Team, Player, Match, Standing, Settings } from '../models/index.js';
 
 const router = express.Router();
+
+// GET /api/settings - Get public settings (for conditional display)
+router.get('/settings', async (req, res) => {
+    try {
+        const settings = await Settings.getSettings();
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch settings' });
+    }
+});
 
 // GET /api/teams - Get all teams
 router.get('/teams', async (req, res) => {
@@ -21,7 +31,7 @@ router.get('/teams/:id', async (req, res) => {
             return res.status(404).json({ error: 'Team not found' });
         }
 
-        const players = await Player.find({ teamId: team._id }).sort({ position: 1, name: 1 });
+        const players = await Player.find({ teamId: team._id }).sort({ name: 1 });
 
         res.json({ ...team.toObject(), players });
     } catch (error) {
@@ -38,7 +48,7 @@ router.get('/matches', async (req, res) => {
             .populate('goalscorers.playerId', 'name')
             .populate('goalscorers.teamId', 'name')
             .populate('cards.playerId', 'name')
-            .sort({ matchday: 1, matchTime: 1 });
+            .sort({ matchNumber: 1, matchday: 1, matchTime: 1 });
 
         res.json(matches);
     } catch (error) {
@@ -111,7 +121,7 @@ router.get('/players', async (req, res) => {
     }
 });
 
-// GET /api/topscorers - Get top scorers
+// GET /api/topscorers - Get top scorers (Golden Boot)
 router.get('/topscorers', async (req, res) => {
     try {
         const topScorers = await Player.find({ goals: { $gt: 0 } })
@@ -122,6 +132,23 @@ router.get('/topscorers', async (req, res) => {
         res.json(topScorers);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch top scorers' });
+    }
+});
+
+// GET /api/cleansheets - Get goalkeepers with clean sheets (Golden Glove)
+router.get('/cleansheets', async (req, res) => {
+    try {
+        const goalkeepers = await Player.find({
+            isGoalkeeper: true,
+            cleanSheets: { $gt: 0 }
+        })
+            .populate('teamId', 'name logo')
+            .sort({ cleanSheets: -1, name: 1 })
+            .limit(20);
+
+        res.json(goalkeepers);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch clean sheets' });
     }
 });
 

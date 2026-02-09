@@ -12,6 +12,7 @@ function UpdateTournament() {
     const [teams, setTeams] = useState([]);
     const [players, setPlayers] = useState([]);
     const [matches, setMatches] = useState([]);
+    const [settings, setSettings] = useState({ showGoldenBoot: false, showGoldenGlove: false });
     const [activeTab, setActiveTab] = useState('matches');
 
     // Form states
@@ -37,14 +38,16 @@ function UpdateTournament() {
 
     const loadData = async () => {
         try {
-            const [teamsRes, playersRes, matchesRes] = await Promise.all([
+            const [teamsRes, playersRes, matchesRes, settingsRes] = await Promise.all([
                 api.getTeams(),
                 api.getPlayers(),
-                api.getMatches()
+                api.getMatches(),
+                api.getAdminSettings(localStorage.getItem('tsl_admin_secret'))
             ]);
             setTeams(teamsRes.data);
             setPlayers(playersRes.data);
             setMatches(matchesRes.data);
+            setSettings(settingsRes.data);
         } catch (err) {
             setMessage({ type: 'error', text: 'Failed to load data' });
         }
@@ -68,6 +71,18 @@ function UpdateTournament() {
     const showMessage = (type, text) => {
         setMessage({ type, text });
         setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    };
+
+    // Settings functions
+    const handleSettingsUpdate = async (key, value) => {
+        try {
+            const newSettings = { ...settings, [key]: value };
+            await api.updateSettings(secret, newSettings);
+            setSettings(newSettings);
+            showMessage('success', `${key === 'showGoldenBoot' ? 'Golden Boot' : 'Golden Glove'} ${value ? 'enabled' : 'disabled'}`);
+        } catch (err) {
+            showMessage('error', 'Failed to update settings');
+        }
     };
 
     // Match management functions
@@ -98,6 +113,36 @@ function UpdateTournament() {
             loadData();
         } catch (err) {
             showMessage('error', 'Failed to add goal');
+        }
+    };
+
+    const handleRemoveGoal = async (matchId, goalIndex) => {
+        try {
+            await api.removeGoal(secret, matchId, goalIndex);
+            showMessage('success', 'Goal removed');
+            loadData();
+        } catch (err) {
+            showMessage('error', 'Failed to remove goal');
+        }
+    };
+
+    const handleMatchUpdate = async (matchId, data) => {
+        try {
+            await api.updateMatch(secret, matchId, data);
+            showMessage('success', 'Match updated');
+            loadData();
+        } catch (err) {
+            showMessage('error', 'Failed to update match');
+        }
+    };
+
+    const handleCleanSheetUpdate = async (playerId, increment) => {
+        try {
+            await api.updateCleanSheet(secret, playerId, increment);
+            showMessage('success', `Clean sheet ${increment > 0 ? 'added' : 'removed'}`);
+            loadData();
+        } catch (err) {
+            showMessage('error', 'Failed to update clean sheet');
         }
     };
 
@@ -163,12 +208,12 @@ function UpdateTournament() {
     return (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="font-display text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">TSL Admin</h1>
                     <p className="text-gray-500 mt-1">Manage matches, teams, and scores</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                     <button
                         onClick={handleRecalculateStandings}
                         className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-sm"
@@ -200,19 +245,69 @@ function UpdateTournament() {
 
             {/* Tabs */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                {['matches', 'teams', 'players'].map(tab => (
+                {['matches', 'fixtures', 'settings', 'goalkeepers', 'teams', 'players'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-5 py-2.5 rounded-xl font-semibold capitalize transition-all ${activeTab === tab
+                        className={`px-5 py-2.5 rounded-xl font-semibold capitalize transition-all whitespace-nowrap ${activeTab === tab
                             ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
-                        {tab}
+                        {tab === 'goalkeepers' ? '🧤 Keepers' : tab}
                     </button>
                 ))}
             </div>
+
+            {/* Settings Tab */}
+            {activeTab === 'settings' && (
+                <div className="card p-6 space-y-6">
+                    <h2 className="text-xl font-bold text-gray-900">Award Display Settings</h2>
+                    <p className="text-gray-500 text-sm">Control which awards are visible to the public on the Awards page.</p>
+
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-200">
+                            <div className="flex items-center gap-3">
+                                <span className="text-3xl">👟</span>
+                                <div>
+                                    <h3 className="font-bold text-gray-900">Golden Boot</h3>
+                                    <p className="text-sm text-gray-600">Top goal scorers leaderboard</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleSettingsUpdate('showGoldenBoot', !settings.showGoldenBoot)}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${settings.showGoldenBoot ? 'bg-green-500' : 'bg-gray-300'
+                                    }`}
+                            >
+                                <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${settings.showGoldenBoot ? 'translate-x-7' : 'translate-x-1'
+                                    }`} />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
+                            <div className="flex items-center gap-3">
+                                <span className="text-3xl">🧤</span>
+                                <div>
+                                    <h3 className="font-bold text-gray-900">Golden Glove</h3>
+                                    <p className="text-sm text-gray-600">Best goalkeepers by clean sheets</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleSettingsUpdate('showGoldenGlove', !settings.showGoldenGlove)}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${settings.showGoldenGlove ? 'bg-green-500' : 'bg-gray-300'
+                                    }`}
+                            >
+                                <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${settings.showGoldenGlove ? 'translate-x-7' : 'translate-x-1'
+                                    }`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-gray-50 rounded-xl text-sm text-gray-600">
+                        <p><strong>💡 Tip:</strong> Enable these settings only when you're ready for the public to see the leaderboards. You can update clean sheets in the "🧤 Keepers" tab.</p>
+                    </div>
+                </div>
+            )}
 
             {/* Matches Tab */}
             {activeTab === 'matches' && (
@@ -226,11 +321,31 @@ function UpdateTournament() {
                             onStatusChange={handleStatusChange}
                             onScoreUpdate={handleScoreUpdate}
                             onAddGoal={handleAddGoal}
+                            onRemoveGoal={handleRemoveGoal}
                             isSelected={selectedMatch === match._id}
                             onSelect={() => setSelectedMatch(selectedMatch === match._id ? null : match._id)}
                         />
                     ))}
                 </div>
+            )}
+
+            {/* Fixtures Tab */}
+            {activeTab === 'fixtures' && (
+                <FixturesEditor
+                    matches={matches}
+                    teams={teams}
+                    onUpdate={handleMatchUpdate}
+                    onReload={loadData}
+                    secret={secret}
+                />
+            )}
+
+            {/* Goalkeepers Tab */}
+            {activeTab === 'goalkeepers' && (
+                <GoalkeeperManager
+                    players={players}
+                    onCleanSheetUpdate={handleCleanSheetUpdate}
+                />
             )}
 
             {/* Teams Tab */}
@@ -260,6 +375,7 @@ function UpdateTournament() {
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700">Team</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-700">Dept</th>
                                 <th className="px-4 py-3 text-center font-semibold text-gray-700">Goals</th>
+                                <th className="px-4 py-3 text-center font-semibold text-gray-700">GK</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -273,6 +389,9 @@ function UpdateTournament() {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-center font-bold text-primary-600">{player.goals}</td>
+                                    <td className="px-4 py-3 text-center">
+                                        {player.isGoalkeeper && <span className="text-lg">🧤</span>}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -284,7 +403,7 @@ function UpdateTournament() {
 }
 
 // Match Editor Component
-function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onAddGoal, isSelected, onSelect }) {
+function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onAddGoal, onRemoveGoal, isSelected, onSelect }) {
     const [scoreA, setScoreA] = useState(match.scoreA);
     const [scoreB, setScoreB] = useState(match.scoreB);
     const [goalPlayer, setGoalPlayer] = useState('');
@@ -296,7 +415,6 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
         setScoreB(match.scoreB);
     }, [match]);
 
-    // Get all players for selected team (from all teams, not just match teams)
     const getPlayersForTeam = (teamId) => {
         return players.filter(p =>
             p.teamId?._id === teamId || p.teamId === teamId
@@ -315,20 +433,20 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
     return (
         <div className="bg-white rounded-2xl shadow-card overflow-hidden border border-gray-100">
             <div
-                className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                className="p-4 sm:p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={onSelect}
             >
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                        <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 sm:gap-4 flex-1 flex-wrap justify-center sm:justify-start">
+                        <div className="flex items-center gap-2">
                             <TeamLogo team={match.teamA} size="sm" />
-                            <span className="font-semibold text-gray-900">{match.teamA?.name}</span>
+                            <span className="font-semibold text-gray-900 text-sm sm:text-base">{match.teamA?.name}</span>
                         </div>
-                        <div className="px-4 py-2 bg-gray-900 rounded-xl">
-                            <span className="font-display text-xl font-bold text-white">{match.scoreA} — {match.scoreB}</span>
+                        <div className="px-3 sm:px-4 py-2 bg-gray-900 rounded-xl">
+                            <span className="font-display text-lg sm:text-xl font-bold text-white">{match.scoreA} — {match.scoreB}</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-900">{match.teamB?.name}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-900 text-sm sm:text-base">{match.teamB?.name}</span>
                             <TeamLogo team={match.teamB} size="sm" />
                         </div>
                     </div>
@@ -351,11 +469,11 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
             </div>
 
             {isSelected && (
-                <div className="border-t border-gray-100 p-5 bg-gray-50 space-y-5" onClick={e => e.stopPropagation()}>
+                <div className="border-t border-gray-100 p-4 sm:p-5 bg-gray-50 space-y-5" onClick={e => e.stopPropagation()}>
                     {/* Status Control */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Match Status</label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                             {['upcoming', 'live', 'finished'].map(status => (
                                 <button
                                     key={status}
@@ -374,13 +492,13 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
                     {/* Score Control */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Update Score</label>
-                        <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-600 font-medium">{match.teamA?.name}</span>
+                                <span className="text-sm text-gray-600 font-medium hidden sm:inline">{match.teamA?.name}</span>
                                 <input
                                     type="number"
                                     min="0"
-                                    className="w-16 px-3 py-2 text-center font-bold border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500"
+                                    className="w-14 sm:w-16 px-3 py-2 text-center font-bold border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500"
                                     value={scoreA}
                                     onChange={(e) => setScoreA(e.target.value)}
                                 />
@@ -390,17 +508,17 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
                                 <input
                                     type="number"
                                     min="0"
-                                    className="w-16 px-3 py-2 text-center font-bold border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500"
+                                    className="w-14 sm:w-16 px-3 py-2 text-center font-bold border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500"
                                     value={scoreB}
                                     onChange={(e) => setScoreB(e.target.value)}
                                 />
-                                <span className="text-sm text-gray-600 font-medium">{match.teamB?.name}</span>
+                                <span className="text-sm text-gray-600 font-medium hidden sm:inline">{match.teamB?.name}</span>
                             </div>
                             <button
                                 onClick={() => onScoreUpdate(match._id, scoreA, scoreB)}
-                                className="px-4 py-2 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition-colors"
+                                className="px-4 py-2 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 transition-colors text-sm"
                             >
-                                Update Score
+                                Update
                             </button>
                         </div>
                     </div>
@@ -408,28 +526,28 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
                     {/* Add Goal */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Add Goal Scorer</label>
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-wrap gap-2 sm:gap-3">
                             <select
-                                className="flex-1 min-w-[180px] px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 bg-white"
+                                className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 bg-white text-sm"
                                 value={goalTeam}
                                 onChange={(e) => {
                                     setGoalTeam(e.target.value);
                                     setGoalPlayer('');
                                 }}
                             >
-                                <option value="">Select Team</option>
+                                <option value="">Team</option>
                                 {teams.map(team => (
                                     <option key={team._id} value={team._id}>{team.name}</option>
                                 ))}
                             </select>
 
                             <select
-                                className="flex-1 min-w-[180px] px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 bg-white"
+                                className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 bg-white text-sm"
                                 value={goalPlayer}
                                 onChange={(e) => setGoalPlayer(e.target.value)}
                                 disabled={!goalTeam}
                             >
-                                <option value="">Select Player</option>
+                                <option value="">Player</option>
                                 {getPlayersForTeam(goalTeam).map(p => (
                                     <option key={p._id} value={p._id}>{p.name}</option>
                                 ))}
@@ -440,35 +558,43 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
                                 min="1"
                                 max="120"
                                 placeholder="Min"
-                                className="w-20 px-3 py-2 border border-gray-200 rounded-lg text-center focus:outline-none focus:border-primary-500"
+                                className="w-16 sm:w-20 px-3 py-2 border border-gray-200 rounded-lg text-center focus:outline-none focus:border-primary-500 text-sm"
                                 value={goalMinute}
                                 onChange={(e) => setGoalMinute(e.target.value)}
                             />
 
                             <button
                                 onClick={handleGoalSubmit}
-                                className="px-4 py-2 bg-secondary-500 text-white font-medium rounded-lg hover:bg-secondary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-secondary-500 text-white font-medium rounded-lg hover:bg-secondary-600 transition-colors disabled:opacity-50 text-sm"
                                 disabled={!goalPlayer || !goalTeam || !goalMinute}
                             >
-                                Add Goal
+                                Add
                             </button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                            💡 You can select any team to record goals (e.g., for own goals or corrections)
-                        </p>
                     </div>
 
-                    {/* Goal Scorers List */}
+                    {/* Goal Scorers List with Remove Option */}
                     {match.goalscorers && match.goalscorers.length > 0 && (
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Goal Scorers</label>
                             <div className="space-y-2">
                                 {match.goalscorers.map((goal, idx) => (
-                                    <div key={idx} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-100">
-                                        <span className="text-lg">⚽</span>
-                                        <span className="font-medium">{goal.playerId?.name || 'Unknown'}</span>
-                                        <span className="text-gray-400 text-sm">{goal.minute}'</span>
-                                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">{goal.teamId?.name}</span>
+                                    <div key={idx} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-100">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-lg">⚽</span>
+                                            <span className="font-medium text-sm">{goal.playerId?.name || 'Unknown'}</span>
+                                            <span className="text-gray-400 text-sm">{goal.minute}'</span>
+                                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">{goal.teamId?.name}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => onRemoveGoal(match._id, idx)}
+                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                            title="Remove goal"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -476,6 +602,181 @@ function MatchEditor({ match, teams, players, onStatusChange, onScoreUpdate, onA
                     )}
                 </div>
             )}
+        </div>
+    );
+}
+
+// Fixtures Editor Component
+function FixturesEditor({ matches, teams, onUpdate, onReload, secret }) {
+    const [editingMatch, setEditingMatch] = useState(null);
+    const [formData, setFormData] = useState({});
+
+    const startEdit = (match) => {
+        setEditingMatch(match._id);
+        setFormData({
+            teamA: match.teamA?._id,
+            teamB: match.teamB?._id,
+            matchNumber: match.matchNumber || '',
+            matchTime: match.matchTime ? new Date(match.matchTime).toISOString().slice(0, 16) : ''
+        });
+    };
+
+    const handleSave = async () => {
+        await onUpdate(editingMatch, {
+            teamA: formData.teamA,
+            teamB: formData.teamB,
+            matchNumber: parseInt(formData.matchNumber) || undefined,
+            matchTime: formData.matchTime ? new Date(formData.matchTime).toISOString() : undefined
+        });
+        setEditingMatch(null);
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-xl text-sm text-blue-700 border border-blue-200">
+                <strong>📝 Fixtures Editor:</strong> Edit match details including teams playing, match number/order, and scheduled time.
+            </div>
+
+            {matches.map((match, idx) => (
+                <div key={match._id} className="card p-4">
+                    {editingMatch === match._id ? (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Team A</label>
+                                    <select
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white"
+                                        value={formData.teamA}
+                                        onChange={(e) => setFormData({ ...formData, teamA: e.target.value })}
+                                    >
+                                        {teams.map(t => (
+                                            <option key={t._id} value={t._id}>{t.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Team B</label>
+                                    <select
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white"
+                                        value={formData.teamB}
+                                        onChange={(e) => setFormData({ ...formData, teamB: e.target.value })}
+                                    >
+                                        {teams.map(t => (
+                                            <option key={t._id} value={t._id}>{t.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Match #</label>
+                                    <input
+                                        type="number"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                                        value={formData.matchNumber}
+                                        onChange={(e) => setFormData({ ...formData, matchNumber: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Match Time</label>
+                                    <input
+                                        type="datetime-local"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                                        value={formData.matchTime}
+                                        onChange={(e) => setFormData({ ...formData, matchTime: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleSave}
+                                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    onClick={() => setEditingMatch(null)}
+                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="text-gray-400 font-mono text-sm">#{match.matchNumber || idx + 1}</span>
+                                <div className="flex items-center gap-2">
+                                    <TeamLogo team={match.teamA} size="xs" />
+                                    <span className="font-medium">{match.teamA?.name}</span>
+                                </div>
+                                <span className="text-gray-400">vs</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium">{match.teamB?.name}</span>
+                                    <TeamLogo team={match.teamB} size="xs" />
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => startEdit(match)}
+                                className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                            >
+                                Edit
+                            </button>
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
+
+// Goalkeeper Manager Component
+function GoalkeeperManager({ players, onCleanSheetUpdate }) {
+    const goalkeepers = players.filter(p => p.isGoalkeeper);
+
+    if (goalkeepers.length === 0) {
+        return (
+            <div className="card p-8 text-center">
+                <span className="text-4xl">🧤</span>
+                <p className="text-gray-500 mt-4">No goalkeepers found in the database.</p>
+                <p className="text-gray-400 text-sm mt-2">Mark players as goalkeepers in the seed data or player management.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-xl text-sm text-blue-700 border border-blue-200">
+                <strong>🧤 Goalkeeper Manager:</strong> Update clean sheets for goalkeepers. Each clean sheet represents a match where the goalkeeper didn't concede a goal.
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {goalkeepers.map(gk => (
+                    <div key={gk._id} className="card p-4 flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold text-gray-900">{gk.name}</h3>
+                            <p className="text-sm text-gray-500">{gk.teamId?.name}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => onCleanSheetUpdate(gk._id, -1)}
+                                className="w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-bold"
+                                disabled={gk.cleanSheets <= 0}
+                            >
+                                -
+                            </button>
+                            <div className="text-center">
+                                <span className="text-2xl font-bold text-gray-900">{gk.cleanSheets || 0}</span>
+                                <p className="text-xs text-gray-500">Clean Sheets</p>
+                            </div>
+                            <button
+                                onClick={() => onCleanSheetUpdate(gk._id, 1)}
+                                className="w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 rounded-lg hover:bg-green-200 font-bold"
+                            >
+                                +
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

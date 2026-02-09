@@ -10,7 +10,7 @@ function Navbar() {
         { path: '/fixtures', label: 'Fixtures' },
         { path: '/table', label: 'Table' },
         { path: '/teams', label: 'Teams' },
-        { path: '/top-scorers', label: 'Top Scorers' }
+        { path: '/awards', label: 'Awards' }
     ];
 
     const isActive = (path) => location.pathname === path;
@@ -37,8 +37,8 @@ function Navbar() {
                                 key={link.path}
                                 to={link.path}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${isActive(link.path)
-                                        ? 'bg-primary-50 text-primary-600'
-                                        : 'text-gray-600 hover:bg-surface-100 hover:text-gray-900'
+                                    ? 'bg-primary-50 text-primary-600'
+                                    : 'text-gray-600 hover:bg-surface-100 hover:text-gray-900'
                                     }`}
                             >
                                 {link.label}
@@ -71,8 +71,8 @@ function Navbar() {
                                     to={link.path}
                                     onClick={() => setMobileMenuOpen(false)}
                                     className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${isActive(link.path)
-                                            ? 'bg-primary-50 text-primary-600'
-                                            : 'text-gray-600 hover:bg-surface-100'
+                                        ? 'bg-primary-50 text-primary-600'
+                                        : 'text-gray-600 hover:bg-surface-100'
                                         }`}
                                 >
                                     {link.label}
@@ -91,8 +91,8 @@ function Navbar() {
                             key={link.path}
                             to={link.path}
                             className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${isActive(link.path)
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-surface-100 text-gray-600'
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-surface-100 text-gray-600'
                                 }`}
                         >
                             {link.label}
