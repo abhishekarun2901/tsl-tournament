@@ -14,6 +14,10 @@ function Table() {
         );
     }
 
+    // Separate standings by pool
+    const poolA = standings?.filter(team => team.pool === 'A') || [];
+    const poolB = standings?.filter(team => team.pool === 'B') || [];
+
     return (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
@@ -31,20 +35,23 @@ function Table() {
                 </p>
             </section>
 
-            {/* Pool Legend */}
-            <div className="flex justify-center gap-4 mb-8">
-                <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-primary-500"></span>
-                    <span className="text-sm text-gray-600">Pool A</span>
+            {/* Pool A */}
+            <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="w-4 h-4 rounded-full bg-primary-500"></span>
+                    <h2 className="font-display text-2xl font-bold text-gray-900">Pool A</h2>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-secondary-500"></span>
-                    <span className="text-sm text-gray-600">Pool B</span>
-                </div>
+                {poolA.length > 0 && <PointsTable standings={poolA} />}
             </div>
 
-            {/* Standings Table */}
-            {standings && <PointsTable standings={standings} />}
+            {/* Pool B */}
+            <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="w-4 h-4 rounded-full bg-secondary-500"></span>
+                    <h2 className="font-display text-2xl font-bold text-gray-900">Pool B</h2>
+                </div>
+                {poolB.length > 0 && <PointsTable standings={poolB} />}
+            </div>
 
             {/* Tiebreaker Info */}
             <div className="mt-8 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl text-white">
@@ -60,11 +67,11 @@ function Table() {
                     </div>
                     <div className="text-center p-3 bg-white/10 rounded-xl">
                         <div className="text-2xl font-bold text-primary-400">3rd</div>
-                        <div className="text-gray-400">Goals For</div>
+                        <div className="text-gray-400">Head-to-Head</div>
                     </div>
                     <div className="text-center p-3 bg-white/10 rounded-xl">
                         <div className="text-2xl font-bold text-primary-400">4th</div>
-                        <div className="text-gray-400">Head-to-Head</div>
+                        <div className="text-gray-400">Goals For</div>
                     </div>
                 </div>
             </div>
