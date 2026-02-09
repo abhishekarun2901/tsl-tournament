@@ -31,7 +31,7 @@ function Teams() {
                     </span>
                 </h1>
                 <p className="text-gray-600 text-lg">
-                    8 Teams • 2 Pools • 56 Players
+                    8 Teams • 2 Pools
                 </p>
             </section>
 

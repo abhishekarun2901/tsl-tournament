@@ -115,7 +115,6 @@ function TeamDetail() {
                     <table className="w-full">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-12">#</th>
                                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Player</th>
                                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Dept</th>
                                 <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Goals</th>
@@ -124,7 +123,6 @@ function TeamDetail() {
                         <tbody>
                             {sortedPlayers.map((player, index) => (
                                 <tr key={player._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                    <td className="px-4 py-3 text-gray-400 font-medium">{player.jerseyNumber || index + 1}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold text-gray-900">{player.name}</span>
