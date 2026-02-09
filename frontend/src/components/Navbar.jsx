@@ -10,7 +10,7 @@ function Navbar() {
         { path: '/fixtures', label: 'Fixtures' },
         { path: '/table', label: 'Table' },
         { path: '/teams', label: 'Teams' },
-        { path: '/awards', label: 'Awards' }
+        { path: '/stats', label: 'Stats' }
     ];
 
     const isActive = (path) => location.pathname === path;

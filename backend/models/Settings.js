@@ -17,7 +17,9 @@ settingsSchema.statics.getSettings = async function () {
     const settings = await this.find({});
     const result = {
         showGoldenBoot: false,
-        showGoldenGlove: false
+        showGoldenGlove: false,
+        showGoldenBall: false,
+        goldenBallPlayer: null  // Player ID chosen by admin
     };
 
     settings.forEach(s => {

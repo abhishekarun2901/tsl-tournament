@@ -29,13 +29,19 @@ router.get('/settings', async (req, res) => {
 // PUT /api/admin/settings - Update settings
 router.put('/settings', async (req, res) => {
     try {
-        const { showGoldenBoot, showGoldenGlove } = req.body;
+        const { showGoldenBoot, showGoldenGlove, showGoldenBall, goldenBallPlayer } = req.body;
 
         if (showGoldenBoot !== undefined) {
             await Settings.setSetting('showGoldenBoot', showGoldenBoot);
         }
         if (showGoldenGlove !== undefined) {
             await Settings.setSetting('showGoldenGlove', showGoldenGlove);
+        }
+        if (showGoldenBall !== undefined) {
+            await Settings.setSetting('showGoldenBall', showGoldenBall);
+        }
+        if (goldenBallPlayer !== undefined) {
+            await Settings.setSetting('goldenBallPlayer', goldenBallPlayer);
         }
 
         const settings = await Settings.getSettings();

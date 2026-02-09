@@ -217,7 +217,7 @@ async function seed() {
         console.log('📅 Creating fixtures (Day 1)...');
 
         const matchDate = new Date();
-        matchDate.setDate(matchDate.getDate() + 2); // 2 days from now
+        matchDate.setDate(matchDate.getDate() + 1); // 1 day from now
         matchDate.setHours(18, 45, 0, 0); // Start at 6:45 PM
 
         for (let i = 0; i < fixturesData.length; i++) {
