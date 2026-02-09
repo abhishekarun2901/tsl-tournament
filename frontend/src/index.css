@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+body {
+  @apply bg-surface-200 text-gray-800 font-sans antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-200;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-500;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white rounded-xl shadow-card transition-all duration-300;
+}
+
+.card:hover {
+  @apply shadow-card-hover;
+}
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500;
+}
+
+.btn-secondary {
+  @apply bg-secondary-500 text-white hover:bg-secondary-600 focus:ring-secondary-500;
+}
+
+.btn-ghost {
+  @apply bg-transparent text-gray-600 hover:bg-surface-200 focus:ring-gray-400;
+}
+
+/* Form styles */
+.input {
+  @apply w-full px-4 py-2 border border-surface-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+}
+
+.select {
+  @apply w-full px-4 py-2 border border-surface-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer;
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+/* Live indicator */
+.live-dot {
+  @apply w-2 h-2 bg-red-500 rounded-full animate-pulse-live;
+}
+
+/* Score styles */
+.score-display {
+  @apply font-display text-4xl font-extrabold text-gray-900;
+}
+
+/* Table styles */
+.table-header {
+  @apply bg-surface-200 text-gray-600 text-xs font-semibold uppercase tracking-wider;
+}
+
+.table-row {
+  @apply border-b border-surface-200 hover:bg-surface-100 transition-colors duration-150;
+}
+
+/* Animation utilities */
+.animate-in {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
+/* Position indicators */
+.pos-up {
+  @apply text-primary-500;
+}
+
+.pos-down {
+  @apply text-red-500;
+}
+
+.pos-same {
+  @apply text-gray-400;
+}
+
+/* Top 4 and relegation highlights */
+.top-4 {
+  @apply border-l-4 border-primary-500;
+}
+
+.relegation {
+  @apply border-l-4 border-red-500;
+}
