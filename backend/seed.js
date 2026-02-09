@@ -13,13 +13,13 @@ const teamsData = [
         pool: 'A',
         logo: '',
         players: [
-            { name: 'Karthik Krishna U', department: 'ME' },
-            { name: 'Shihan', department: 'ME' },
-            { name: 'Ben Jude Tharsiuse', department: 'ME' },
-            { name: 'Muhammad Rashid', department: 'EC' },
+            { name: 'Karthik Krishna U', department: 'ME', isGoalkeeper: true },
             { name: 'Aswin Raj K', department: 'ME' },
-            { name: 'Rameel', department: 'ME' },
-            { name: 'Anand', department: 'ME' }
+            { name: 'Adhithyan Ramesh', department: 'EC' },
+            { name: 'Ben Jude Tharsiuse', department: 'ME' },
+            { name: 'Shihan', department: 'ME' },
+            { name: 'Muhammad Rashid', department: 'EC' },
+            { name: 'Jeswin', department: 'CE' }
         ]
     },
     {
@@ -29,11 +29,11 @@ const teamsData = [
         pool: 'A',
         logo: '',
         players: [
-            { name: 'Sreekuttan', department: 'ME' },
+            { name: 'Vishnu S', department: 'EE' },
             { name: 'Rejith R', department: 'EE' },
             { name: 'Sanjay S', department: 'ME' },
             { name: 'Anandhu', department: 'ME' },
-            { name: 'Shamil A', department: 'CSE' },
+            { name: 'Muhamed Ziyan', department: 'ME' },
             { name: 'Niranjan Ravi', department: 'ME' },
             { name: 'Muhammed Anas', department: 'EC' }
         ]
@@ -61,7 +61,7 @@ const teamsData = [
         pool: 'A',
         logo: '',
         players: [
-            { name: 'Harikrishna R', department: 'ME' },
+            { name: 'Niranjan', department: 'ME', isGoalkeeper: true },
             { name: 'Rajeeb', department: 'CE' },
             { name: 'Akash Vijayan', department: 'ME' },
             { name: 'Adith Krishna', department: 'EC' },
@@ -88,6 +88,22 @@ const teamsData = [
         ]
     },
     {
+        name: 'São Paulo FC',
+        manager: 'Akash',
+        captain: 'Sriram',
+        pool: 'B',
+        logo: '',
+        players: [
+            { name: 'Abhishek M Pillai', department: 'EC' },
+            { name: 'Ahammed Najjad', department: 'ME' },
+            { name: 'Anand', department: 'ME' },
+            { name: 'Rishikesh Unnikrishnan', department: 'EC' },
+            { name: 'K Vishnu', department: 'IC' },
+            { name: 'Abhinav R', department: 'EC' },
+            { name: 'Anfas Anwar', department: 'ME' }
+        ]
+    },
+    {
         name: 'Força FC',
         manager: 'Arun Vellodan',
         captain: 'Arun Prakash',
@@ -101,22 +117,6 @@ const teamsData = [
             { name: 'Noel Tom Santhosh', department: 'CSE' },
             { name: 'Sabari R Nadh', department: 'CSE' },
             { name: 'Harikrishnan A', department: 'CSE' }
-        ]
-    },
-    {
-        name: 'São Paulo FC',
-        manager: 'Akash',
-        captain: 'Sriram',
-        pool: 'B',
-        logo: '',
-        players: [
-            { name: 'Abhinav R', department: 'EC' },
-            { name: 'Rishikesh Unnikrishnan', department: 'EC' },
-            { name: 'Anand', department: 'ME' },
-            { name: 'Muhammad Rashid', department: 'EC' },
-            { name: 'K Vishnu', department: 'IC' },
-            { name: 'Ahammed Najjad', department: 'ME' },
-            { name: 'Aswin Raj K', department: 'ME' }
         ]
     },
     {
@@ -187,7 +187,9 @@ async function seed() {
                     teamId: team._id,
                     department: playerData.department,
                     jerseyNumber: i + 1,
-                    goals: 0
+                    goals: 0,
+                    isGoalkeeper: playerData.isGoalkeeper || false,
+                    cleanSheets: 0
                 });
                 await player.save();
             }
