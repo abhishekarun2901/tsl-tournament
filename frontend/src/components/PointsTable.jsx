@@ -1,6 +1,6 @@
 import TeamLogo from './TeamLogo';
 
-function PointsTable({ standings, highlightTop = 4, highlightBottom = 1 }) {
+function PointsTable({ standings, compact = false }) {
     if (!standings || standings.length === 0) {
         return (
             <div className="card p-8 text-center text-gray-500">
@@ -9,145 +9,168 @@ function PointsTable({ standings, highlightTop = 4, highlightBottom = 1 }) {
         );
     }
 
-    const getPositionChange = (standing, currentIndex) => {
-        if (standing.previousPosition === null || standing.previousPosition === undefined) {
-            return 'same';
-        }
-        const currentPosition = currentIndex + 1;
-        if (standing.previousPosition > currentPosition) return 'up';
-        if (standing.previousPosition < currentPosition) return 'down';
-        return 'same';
-    };
+    // Sort standings by points (desc), then goal difference (desc), then goals for (desc)
+    const sortedStandings = [...standings].sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.gd !== a.gd) return b.gd - a.gd;
+        if (b.gf !== a.gf) return b.gf - a.gf;
+        // Finally sort alphabetically by team name
+        return (a.teamId?.name || '').localeCompare(b.teamId?.name || '');
+    });
 
-    const getPositionIcon = (change) => {
-        switch (change) {
-            case 'up':
-                return <span className="pos-up">▲</span>;
-            case 'down':
-                return <span className="pos-down">▼</span>;
-            default:
-                return <span className="pos-same">–</span>;
-        }
-    };
+    if (compact) {
+        return (
+            <div className="card overflow-hidden">
+                {sortedStandings.slice(0, 5).map((standing, index) => (
+                    <div
+                        key={standing._id}
+                        className={`flex items-center justify-between p-3 border-b border-surface-100 last:border-b-0 hover:bg-surface-50 ${index === 0 ? 'bg-gradient-to-r from-yellow-50 to-white' : ''
+                            }`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <span className={`font-bold w-6 text-center ${index < 4 ? 'text-primary-600' : 'text-gray-500'}`}>
+                                {index + 1}
+                            </span>
+                            <span className="font-medium text-gray-900 text-sm">
+                                {standing.teamId?.name}
+                            </span>
+                        </div>
+                        <span className="font-bold text-gray-900">{standing.points}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
     return (
-        <div className="card overflow-hidden">
-            {/* Desktop Table */}
+        <div className="card overflow-hidden border-2 border-gray-100">
+            {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="table-header">
-                            <th className="px-4 py-3 text-left w-12">#</th>
-                            <th className="px-4 py-3 text-left">Team</th>
-                            <th className="px-4 py-3 text-center w-12">P</th>
-                            <th className="px-4 py-3 text-center w-12">W</th>
-                            <th className="px-4 py-3 text-center w-12">D</th>
-                            <th className="px-4 py-3 text-center w-12">L</th>
-                            <th className="px-4 py-3 text-center w-12">GF</th>
-                            <th className="px-4 py-3 text-center w-12">GA</th>
-                            <th className="px-4 py-3 text-center w-12">GD</th>
-                            <th className="px-4 py-3 text-center w-16">Pts</th>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-12">Pos</th>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Team</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">P</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">W</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">D</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">L</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">GF</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">GA</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">GD</th>
+                            <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 w-16">Pts</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {standings.map((standing, index) => {
-                            const position = index + 1;
-                            const isTop = position <= highlightTop;
-                            const isBottom = position > standings.length - highlightBottom;
-                            const positionChange = getPositionChange(standing, index);
-
-                            return (
-                                <tr
-                                    key={standing._id}
-                                    className={`table-row transition-all duration-500 ${isTop ? 'top-4 bg-primary-50/30' : ''
-                                        } ${isBottom ? 'relegation bg-red-50/30' : ''}`}
-                                >
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-1">
-                                            <span className="font-bold text-gray-700">{position}</span>
-                                            {getPositionIcon(positionChange)}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-3">
-                                            <TeamLogo team={standing.teamId} size="sm" />
-                                            <span className="font-medium text-gray-900">
-                                                {standing.teamId?.name}
-                                            </span>
-                                            <span className="text-xs text-gray-400 bg-surface-100 px-2 py-0.5 rounded">
+                        {sortedStandings.map((standing, index) => (
+                            <tr
+                                key={standing._id}
+                                className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === 0 ? 'bg-gradient-to-r from-yellow-50 to-white' : ''
+                                    }`}
+                            >
+                                <td className="px-4 py-3">
+                                    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${index === 0
+                                            ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white'
+                                            : index < 4
+                                                ? 'bg-primary-100 text-primary-600'
+                                                : 'bg-gray-100 text-gray-500'
+                                        }`}>
+                                        {index + 1}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-3">
+                                    <div className="flex items-center gap-3">
+                                        <TeamLogo team={standing.teamId} size="sm" />
+                                        <div>
+                                            <span className="font-semibold text-gray-900">{standing.teamId?.name}</span>
+                                            <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${standing.teamId?.pool === 'A'
+                                                    ? 'bg-primary-100 text-primary-600'
+                                                    : 'bg-secondary-100 text-secondary-600'
+                                                }`}>
                                                 Pool {standing.teamId?.pool}
                                             </span>
                                         </div>
-                                    </td>
-                                    <td className="px-4 py-3 text-center text-gray-600">{standing.played}</td>
-                                    <td className="px-4 py-3 text-center text-green-600 font-medium">{standing.won}</td>
-                                    <td className="px-4 py-3 text-center text-gray-600">{standing.draw}</td>
-                                    <td className="px-4 py-3 text-center text-red-600 font-medium">{standing.lost}</td>
-                                    <td className="px-4 py-3 text-center text-gray-600">{standing.gf}</td>
-                                    <td className="px-4 py-3 text-center text-gray-600">{standing.ga}</td>
-                                    <td className="px-4 py-3 text-center font-medium">
-                                        <span className={standing.gd > 0 ? 'text-green-600' : standing.gd < 0 ? 'text-red-600' : 'text-gray-600'}>
-                                            {standing.gd > 0 ? `+${standing.gd}` : standing.gd}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <span className="font-bold text-lg text-gray-900">{standing.points}</span>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                    </div>
+                                </td>
+                                <td className="px-4 py-3 text-center text-gray-600">{standing.played}</td>
+                                <td className="px-4 py-3 text-center text-green-600 font-medium">{standing.won}</td>
+                                <td className="px-4 py-3 text-center text-gray-500">{standing.draw}</td>
+                                <td className="px-4 py-3 text-center text-red-500">{standing.lost}</td>
+                                <td className="px-4 py-3 text-center text-gray-600">{standing.gf}</td>
+                                <td className="px-4 py-3 text-center text-gray-600">{standing.ga}</td>
+                                <td className="px-4 py-3 text-center font-medium">
+                                    <span className={standing.gd > 0 ? 'text-green-600' : standing.gd < 0 ? 'text-red-500' : 'text-gray-500'}>
+                                        {standing.gd > 0 ? `+${standing.gd}` : standing.gd}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                    <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl font-bold text-lg ${index === 0
+                                            ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white'
+                                            : 'bg-gray-100 text-gray-900'
+                                        }`}>
+                                        {standing.points}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
 
-            {/* Mobile Cards */}
+            {/* Mobile View */}
             <div className="md:hidden">
-                {standings.map((standing, index) => {
-                    const position = index + 1;
-                    const isTop = position <= highlightTop;
-                    const isBottom = position > standings.length - highlightBottom;
-                    const positionChange = getPositionChange(standing, index);
-
-                    return (
-                        <div
-                            key={standing._id}
-                            className={`p-4 border-b border-surface-200 last:border-b-0 ${isTop ? 'border-l-4 border-l-primary-500 bg-primary-50/30' : ''
-                                } ${isBottom ? 'border-l-4 border-l-red-500 bg-red-50/30' : ''}`}
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-1 w-8">
-                                        <span className="font-bold text-gray-700">{position}</span>
-                                        {getPositionIcon(positionChange)}
-                                    </div>
-                                    <TeamLogo team={standing.teamId} size="sm" />
-                                    <div>
-                                        <p className="font-medium text-gray-900 text-sm">{standing.teamId?.name}</p>
-                                        <p className="text-xs text-gray-500">
-                                            {standing.played}P · GD: {standing.gd > 0 ? `+${standing.gd}` : standing.gd}
-                                        </p>
-                                    </div>
+                {sortedStandings.map((standing, index) => (
+                    <div
+                        key={standing._id}
+                        className={`p-4 border-b border-gray-100 last:border-b-0 ${index === 0 ? 'bg-gradient-to-r from-yellow-50 to-white' : ''
+                            }`}
+                    >
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${index === 0
+                                        ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white'
+                                        : index < 4
+                                            ? 'bg-primary-100 text-primary-600'
+                                            : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                    {index + 1}
+                                </span>
+                                <TeamLogo team={standing.teamId} size="sm" />
+                                <span className="font-semibold text-gray-900">{standing.teamId?.name}</span>
+                            </div>
+                            <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl font-bold text-lg ${index === 0
+                                    ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white'
+                                    : 'bg-gray-100 text-gray-900'
+                                }`}>
+                                {standing.points}
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2 text-center text-sm">
+                            <div className="bg-gray-50 rounded-lg p-2">
+                                <div className="text-gray-400 text-xs">P</div>
+                                <div className="font-semibold">{standing.played}</div>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-2">
+                                <div className="text-gray-400 text-xs">W-D-L</div>
+                                <div className="font-semibold">
+                                    <span className="text-green-600">{standing.won}</span>-
+                                    <span className="text-gray-500">{standing.draw}</span>-
+                                    <span className="text-red-500">{standing.lost}</span>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-xl text-gray-900">{standing.points}</p>
-                                    <p className="text-xs text-gray-500">pts</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-2">
+                                <div className="text-gray-400 text-xs">GF-GA</div>
+                                <div className="font-semibold">{standing.gf}-{standing.ga}</div>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-2">
+                                <div className="text-gray-400 text-xs">GD</div>
+                                <div className={`font-semibold ${standing.gd > 0 ? 'text-green-600' : standing.gd < 0 ? 'text-red-500' : ''}`}>
+                                    {standing.gd > 0 ? `+${standing.gd}` : standing.gd}
                                 </div>
                             </div>
                         </div>
-                    );
-                })}
-            </div>
-
-            {/* Legend */}
-            <div className="px-4 py-3 bg-surface-100 border-t border-surface-200 flex items-center gap-4 text-xs text-gray-500">
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-primary-500 rounded"></div>
-                    <span>Top 4</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded"></div>
-                    <span>Bottom</span>
-                </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

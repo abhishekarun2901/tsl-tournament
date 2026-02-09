@@ -2,12 +2,11 @@ import { getStandings } from '../services/api';
 import { useLivePolling } from '../hooks/useLivePolling';
 import PointsTable from '../components/PointsTable';
 import LoadingSpinner from '../components/LoadingSpinner';
-import LastUpdated from '../components/LastUpdated';
 
 function Table() {
-    const { data: standings, loading, lastUpdated } = useLivePolling(getStandings, 10000);
+    const { data: standings, loading } = useLivePolling(getStandings, 10000);
 
-    if (loading) {
+    if (loading && !standings) {
         return (
             <div className="min-h-[50vh] flex items-center justify-center">
                 <LoadingSpinner text="Loading standings..." />
@@ -18,44 +17,56 @@ function Table() {
     return (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="font-display text-3xl font-bold text-gray-900">Points Table</h1>
-                    <p className="text-gray-500 mt-1">Auto-calculated standings</p>
+            <section className="text-center mb-10">
+                <h1 className="font-display text-4xl md:text-5xl font-extrabold mb-4">
+                    <span className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
+                        Points
+                    </span>
+                    <span className="bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
+                        {' '}Table
+                    </span>
+                </h1>
+                <p className="text-gray-600 text-lg">
+                    Live standings • Sorted by points & goal difference
+                </p>
+            </section>
+
+            {/* Pool Legend */}
+            <div className="flex justify-center gap-4 mb-8">
+                <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-primary-500"></span>
+                    <span className="text-sm text-gray-600">Pool A</span>
                 </div>
-                <LastUpdated timestamp={lastUpdated} />
+                <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-secondary-500"></span>
+                    <span className="text-sm text-gray-600">Pool B</span>
+                </div>
             </div>
 
-            {/* Points Info */}
-            <div className="card p-4 mb-6 bg-gradient-to-r from-primary-50 to-secondary-50">
-                <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-primary-600">3 pts</span>
-                        <span className="text-gray-600">Win</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-600">1 pt</span>
-                        <span className="text-gray-600">Draw</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-400">0 pts</span>
-                        <span className="text-gray-600">Loss</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Table */}
-            <PointsTable standings={standings} highlightTop={4} highlightBottom={1} />
+            {/* Standings Table */}
+            {standings && <PointsTable standings={standings} />}
 
             {/* Tiebreaker Info */}
-            <div className="mt-6 p-4 bg-surface-100 rounded-lg">
-                <h3 className="font-semibold text-gray-700 mb-2">Tiebreaker Rules</h3>
-                <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1">
-                    <li>Points</li>
-                    <li>Goal Difference (GD)</li>
-                    <li>Goals For (GF)</li>
-                    <li>Head-to-Head record</li>
-                </ol>
+            <div className="mt-8 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl text-white">
+                <h3 className="font-display font-bold text-lg mb-4">Tiebreaker Rules</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="text-center p-3 bg-white/10 rounded-xl">
+                        <div className="text-2xl font-bold text-primary-400">1st</div>
+                        <div className="text-gray-400">Points</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/10 rounded-xl">
+                        <div className="text-2xl font-bold text-primary-400">2nd</div>
+                        <div className="text-gray-400">Goal Difference</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/10 rounded-xl">
+                        <div className="text-2xl font-bold text-primary-400">3rd</div>
+                        <div className="text-gray-400">Goals For</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/10 rounded-xl">
+                        <div className="text-2xl font-bold text-primary-400">4th</div>
+                        <div className="text-gray-400">Head-to-Head</div>
+                    </div>
+                </div>
             </div>
         </div>
     );

@@ -71,4 +71,54 @@ function Fixtures() {
                         key={tab.key}
                         onClick={() => setFilter(tab.key)}
                         className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${filter === tab.key
-                                ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg shadow-primary-500/30
+                                ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg shadow-primary-500/30'
+                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                            }`}
+                    >
+                        {tab.key === 'live' && tab.count > 0 && (
+                            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        )}
+                        {tab.label}
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${filter === tab.key
+                                ? 'bg-white/20'
+                                : 'bg-gray-100'
+                            }`}>
+                            {tab.count}
+                        </span>
+                    </button>
+                ))}
+            </div>
+
+            {/* Matches List */}
+            {filteredMatches.length > 0 ? (
+                <div className="space-y-4">
+                    {filteredMatches.map((match, index) => (
+                        <div key={match._id} className="relative group">
+                            <div className="absolute -left-4 top-1/2 -translate-y-1/2 bg-gradient-to-br from-primary-500 to-primary-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg shadow-primary-500/30 opacity-0 md:opacity-100 group-hover:scale-110 transition-transform">
+                                {match.matchNumber || index + 1}
+                            </div>
+                            <div className="md:ml-6">
+                                <MatchCard match={match} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="card p-12 text-center">
+                    <div className="text-6xl mb-4">
+                        {filter === 'live' ? '📺' : filter === 'finished' ? '🏆' : '⚽'}
+                    </div>
+                    <p className="text-gray-500 text-lg">
+                        {filter === 'live'
+                            ? 'No live matches at the moment'
+                            : filter === 'finished'
+                                ? 'No finished matches yet'
+                                : 'No matches found'}
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default Fixtures;
