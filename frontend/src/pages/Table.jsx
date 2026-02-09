@@ -14,9 +14,9 @@ function Table() {
         );
     }
 
-    // Separate standings by pool
-    const poolA = standings?.filter(team => team.pool === 'A') || [];
-    const poolB = standings?.filter(team => team.pool === 'B') || [];
+    // Separate standings by pool (pool is nested in teamId)
+    const poolA = standings?.filter(team => team.teamId?.pool === 'A') || [];
+    const poolB = standings?.filter(team => team.teamId?.pool === 'B') || [];
 
     return (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -41,7 +41,11 @@ function Table() {
                     <span className="w-4 h-4 rounded-full bg-primary-500"></span>
                     <h2 className="font-display text-2xl font-bold text-gray-900">Pool A</h2>
                 </div>
-                {poolA.length > 0 && <PointsTable standings={poolA} />}
+                {poolA.length > 0 ? (
+                    <PointsTable standings={poolA} />
+                ) : (
+                    <div className="card p-6 text-center text-gray-500">No teams in Pool A yet</div>
+                )}
             </div>
 
             {/* Pool B */}
@@ -50,7 +54,11 @@ function Table() {
                     <span className="w-4 h-4 rounded-full bg-secondary-500"></span>
                     <h2 className="font-display text-2xl font-bold text-gray-900">Pool B</h2>
                 </div>
-                {poolB.length > 0 && <PointsTable standings={poolB} />}
+                {poolB.length > 0 ? (
+                    <PointsTable standings={poolB} />
+                ) : (
+                    <div className="card p-6 text-center text-gray-500">No teams in Pool B yet</div>
+                )}
             </div>
 
             {/* Tiebreaker Info */}
