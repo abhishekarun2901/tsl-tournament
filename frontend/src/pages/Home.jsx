@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
-import { getMatches, getStandings } from '../services/api';
+import { getMatches } from '../services/api';
 import { useLivePolling } from '../hooks/useLivePolling';
 import MatchCard from '../components/MatchCard';
-import PointsTable from '../components/PointsTable';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SponsorsSection from '../components/SponsorsSection';
 
 function Home() {
     const { data: matches, loading: matchesLoading } = useLivePolling(getMatches, 10000);
-    const { data: standings, loading: standingsLoading } = useLivePolling(getStandings, 10000);
 
     const { liveMatches, upcomingMatches, finishedMatches } = useMemo(() => {
         if (!matches) return { liveMatches: [], upcomingMatches: [], finishedMatches: [] };
@@ -33,7 +31,7 @@ function Home() {
         return diffDays;
     }, [matches]);
 
-    if (matchesLoading && standingsLoading) {
+    if (matchesLoading) {
         return (
             <div className="min-h-[50vh] flex items-center justify-center">
                 <LoadingSpinner text="Loading tournament data..." />
@@ -97,8 +95,9 @@ function Home() {
                 </section>
             )}
 
+            {/* Match Schedule and Tournament Info */}
             <div className="grid lg:grid-cols-3 gap-8">
-                {/* Main Content */}
+                {/* Main Content - Match Schedule */}
                 <div className="lg:col-span-2 space-y-10">
                     {/* Day 1 Fixtures */}
                     <section>
@@ -149,47 +148,8 @@ function Home() {
                     )}
                 </div>
 
-                {/* Sidebar */}
+                {/* Sidebar - Tournament Info */}
                 <div className="space-y-6">
-                    {/* Mini Standings */}
-                    <section>
-                        <h2 className="font-display text-xl font-bold text-gray-900 mb-4">
-                            Standings
-                        </h2>
-                        {standings && (() => {
-                            // Sort standings by points, then GD, then GF, then alphabetically
-                            const sortedStandings = [...standings].sort((a, b) => {
-                                if (b.points !== a.points) return b.points - a.points;
-                                if (b.gd !== a.gd) return b.gd - a.gd;
-                                if (b.gf !== a.gf) return b.gf - a.gf;
-                                return (a.teamId?.name || '').localeCompare(b.teamId?.name || '');
-                            });
-                            return (
-                                <div className="card overflow-hidden border-2 border-surface-100">
-                                    {sortedStandings.map((standing, index) => (
-                                        <div
-                                            key={standing._id}
-                                            className={`flex items-center justify-between p-3 border-b border-surface-100 last:border-b-0 hover:bg-gradient-to-r hover:from-surface-50 hover:to-white transition-colors ${index === 0 ? 'bg-gradient-to-r from-yellow-50 to-white' : ''
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <span className={`font-bold w-6 h-6 rounded-full flex items-center justify-center text-xs ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-white' :
-                                                    index < 4 ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-500'
-                                                    }`}>
-                                                    {index + 1}
-                                                </span>
-                                                <span className="font-medium text-gray-900 text-sm">
-                                                    {standing.teamId?.name}
-                                                </span>
-                                            </div>
-                                            <span className="font-bold text-gray-900">{standing.points}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })()}
-                    </section>
-
                     {/* Tournament Info */}
                     <section className="card p-5 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
                         <h3 className="font-display font-bold text-lg mb-4">Tournament Info</h3>

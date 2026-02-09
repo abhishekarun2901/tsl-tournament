@@ -64,7 +64,7 @@ function Table() {
             {/* Tiebreaker Info */}
             <div className="mt-8 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl text-white">
                 <h3 className="font-display font-bold text-lg mb-4">Tiebreaker Rules</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-3 gap-4 text-sm">
                     <div className="text-center p-3 bg-white/10 rounded-xl">
                         <div className="text-2xl font-bold text-primary-400">1st</div>
                         <div className="text-gray-400">Points</div>
@@ -75,10 +75,6 @@ function Table() {
                     </div>
                     <div className="text-center p-3 bg-white/10 rounded-xl">
                         <div className="text-2xl font-bold text-primary-400">3rd</div>
-                        <div className="text-gray-400">Goals For</div>
-                    </div>
-                    <div className="text-center p-3 bg-white/10 rounded-xl">
-                        <div className="text-2xl font-bold text-primary-400">4th</div>
                         <div className="text-gray-400">Head-to-Head</div>
                     </div>
                 </div>
