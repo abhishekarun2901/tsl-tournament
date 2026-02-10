@@ -75,7 +75,7 @@ function Home() {
                     </span>
                 </h1>
                 <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto font-medium">
-                    Live scores, fixtures, and standings for the ultimate local football tournament
+                    Lace up your boots for <br /> One Last Dance.
                 </p>
             </section>
 
