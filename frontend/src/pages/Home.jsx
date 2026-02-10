@@ -26,8 +26,10 @@ function Home() {
 
         const matchDate = new Date(firstMatch.matchTime);
         const today = new Date();
-        const diffTime = matchDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Compare by calendar date to avoid rounding issues
+        const matchDay = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate());
+        const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const diffDays = Math.round((matchDay - todayDay) / (1000 * 60 * 60 * 24));
         return diffDays;
     }, [matches]);
 
