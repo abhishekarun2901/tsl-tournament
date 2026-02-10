@@ -146,6 +146,16 @@ function UpdateTournament() {
         }
     };
 
+    const handleAssistUpdate = async (playerId, increment) => {
+        try {
+            await api.updateAssist(secret, playerId, increment);
+            showMessage('success', `Assist ${increment > 0 ? 'added' : 'removed'}`);
+            loadData();
+        } catch (err) {
+            showMessage('error', 'Failed to update assist');
+        }
+    };
+
     const handleRecalculateStandings = async () => {
         try {
             await api.recalculateStandings(secret);
@@ -245,7 +255,7 @@ function UpdateTournament() {
 
             {/* Tabs */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                {['matches', 'fixtures', 'settings', 'goalkeepers', 'teams', 'players'].map(tab => (
+                {['matches', 'fixtures', 'settings', 'goalkeepers', 'assists', 'teams', 'players'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -254,7 +264,7 @@ function UpdateTournament() {
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
-                        {tab === 'goalkeepers' ? '🧤 Keepers' : tab}
+                        {tab === 'goalkeepers' ? '🧤 Keepers' : tab === 'assists' ? '🅰️ Assists' : tab}
                     </button>
                 ))}
             </div>
@@ -345,6 +355,15 @@ function UpdateTournament() {
                 <GoalkeeperManager
                     players={players}
                     onCleanSheetUpdate={handleCleanSheetUpdate}
+                />
+            )}
+
+            {/* Assists Tab */}
+            {activeTab === 'assists' && (
+                <AssistManager
+                    players={players}
+                    teams={teams}
+                    onAssistUpdate={handleAssistUpdate}
                 />
             )}
 
@@ -769,6 +788,80 @@ function GoalkeeperManager({ players, onCleanSheetUpdate }) {
                             </div>
                             <button
                                 onClick={() => onCleanSheetUpdate(gk._id, 1)}
+                                className="w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 rounded-lg hover:bg-green-200 font-bold"
+                            >
+                                +
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// Assist Manager Component
+function AssistManager({ players, teams, onAssistUpdate }) {
+    const [filterTeam, setFilterTeam] = useState('');
+
+    const filteredPlayers = filterTeam
+        ? players.filter(p => (p.teamId?._id || p.teamId) === filterTeam)
+        : players;
+
+    // Sort by assists descending, then alphabetically
+    const sortedPlayers = [...filteredPlayers].sort((a, b) => {
+        if ((b.assists || 0) !== (a.assists || 0)) return (b.assists || 0) - (a.assists || 0);
+        return a.name.localeCompare(b.name);
+    });
+
+    return (
+        <div className="space-y-4">
+            <div className="p-4 bg-purple-50 rounded-xl text-sm text-purple-700 border border-purple-200">
+                <strong>🅰️ Assist Manager:</strong> Update assists for each player. Select a team to filter or view all players.
+            </div>
+
+            {/* Team Filter */}
+            <div className="flex gap-2 flex-wrap">
+                <button
+                    onClick={() => setFilterTeam('')}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${!filterTeam ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                >
+                    All Teams
+                </button>
+                {teams.map(team => (
+                    <button
+                        key={team._id}
+                        onClick={() => setFilterTeam(team._id)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${filterTeam === team._id ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                    >
+                        {team.name}
+                    </button>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {sortedPlayers.map(player => (
+                    <div key={player._id} className="card p-4 flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold text-gray-900">{player.name}</h3>
+                            <p className="text-sm text-gray-500">{player.teamId?.name}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => onAssistUpdate(player._id, -1)}
+                                className="w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-bold"
+                                disabled={(player.assists || 0) <= 0}
+                            >
+                                -
+                            </button>
+                            <div className="text-center">
+                                <span className="text-2xl font-bold text-gray-900">{player.assists || 0}</span>
+                                <p className="text-xs text-gray-500">Assists</p>
+                            </div>
+                            <button
+                                onClick={() => onAssistUpdate(player._id, 1)}
                                 className="w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 rounded-lg hover:bg-green-200 font-bold"
                             >
                                 +

@@ -154,6 +154,27 @@ router.patch('/player/:id/cleansheet', async (req, res) => {
     }
 });
 
+// PATCH /api/admin/player/:id/assist - Update player assists
+router.patch('/player/:id/assist', async (req, res) => {
+    try {
+        const { increment } = req.body; // +1 or -1
+
+        const player = await Player.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { assists: increment || 1 } },
+            { new: true }
+        ).populate('teamId', 'name logo');
+
+        if (!player) {
+            return res.status(404).json({ error: 'Player not found' });
+        }
+
+        res.json(player);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update assists', details: error.message });
+    }
+});
+
 // =====================
 // MATCH ENDPOINTS
 // =====================
