@@ -115,11 +115,11 @@ router.post('/player', async (req, res) => {
 // PUT /api/admin/player/:id - Update a player
 router.put('/player/:id', async (req, res) => {
     try {
-        const { name, teamId, department, jerseyNumber, goals, cleanSheets, isGoalkeeper } = req.body;
+        const { name, teamId, department, jerseyNumber, goals, assists, cleanSheets, isGoalkeeper } = req.body;
 
         const player = await Player.findByIdAndUpdate(
             req.params.id,
-            { name, teamId, department, jerseyNumber, goals, cleanSheets, isGoalkeeper },
+            { name, teamId, department, jerseyNumber, goals, assists, cleanSheets, isGoalkeeper },
             { new: true }
         );
 
@@ -157,13 +157,24 @@ router.patch('/player/:id/cleansheet', async (req, res) => {
 // PATCH /api/admin/player/:id/assist - Update player assists
 router.patch('/player/:id/assist', async (req, res) => {
     try {
-        const { increment } = req.body; // +1 or -1
+        const { increment, value } = req.body; // increment: +1/-1, or value: set directly
 
-        const player = await Player.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { assists: increment || 1 } },
-            { new: true }
-        ).populate('teamId', 'name logo');
+        let player;
+        if (value !== undefined) {
+            // Direct set
+            player = await Player.findByIdAndUpdate(
+                req.params.id,
+                { assists: Math.max(0, parseInt(value)) },
+                { new: true }
+            ).populate('teamId', 'name logo');
+        } else {
+            // Increment/decrement
+            player = await Player.findByIdAndUpdate(
+                req.params.id,
+                { $inc: { assists: increment || 1 } },
+                { new: true }
+            ).populate('teamId', 'name logo');
+        }
 
         if (!player) {
             return res.status(404).json({ error: 'Player not found' });

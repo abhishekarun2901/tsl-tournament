@@ -62,6 +62,9 @@ export const updateCleanSheet = (secret, playerId, increment) =>
 export const updateAssist = (secret, playerId, increment) =>
     adminApi(secret).patch(`/player/${playerId}/assist`, { increment });
 
+export const setAssist = (secret, playerId, value) =>
+    adminApi(secret).patch(`/player/${playerId}/assist`, { value });
+
 // Matches
 export const createMatch = (secret, data) =>
     adminApi(secret).post('/match', data);

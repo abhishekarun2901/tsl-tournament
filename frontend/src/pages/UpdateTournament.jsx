@@ -156,6 +156,16 @@ function UpdateTournament() {
         }
     };
 
+    const handleAssistSet = async (playerId, value) => {
+        try {
+            await api.setAssist(secret, playerId, value);
+            showMessage('success', `Assists set to ${value}`);
+            loadData();
+        } catch (err) {
+            showMessage('error', 'Failed to set assists');
+        }
+    };
+
     const handleRecalculateStandings = async () => {
         try {
             await api.recalculateStandings(secret);
@@ -364,6 +374,7 @@ function UpdateTournament() {
                     players={players}
                     teams={teams}
                     onAssistUpdate={handleAssistUpdate}
+                    onAssistSet={handleAssistSet}
                 />
             )}
 
@@ -801,8 +812,10 @@ function GoalkeeperManager({ players, onCleanSheetUpdate }) {
 }
 
 // Assist Manager Component
-function AssistManager({ players, teams, onAssistUpdate }) {
+function AssistManager({ players, teams, onAssistUpdate, onAssistSet }) {
     const [filterTeam, setFilterTeam] = useState('');
+    const [editingPlayer, setEditingPlayer] = useState(null);
+    const [editValue, setEditValue] = useState('');
 
     const filteredPlayers = filterTeam
         ? players.filter(p => (p.teamId?._id || p.teamId) === filterTeam)
@@ -814,10 +827,19 @@ function AssistManager({ players, teams, onAssistUpdate }) {
         return a.name.localeCompare(b.name);
     });
 
+    const handleDirectSet = (playerId) => {
+        const val = parseInt(editValue);
+        if (!isNaN(val) && val >= 0) {
+            onAssistSet(playerId, val);
+            setEditingPlayer(null);
+            setEditValue('');
+        }
+    };
+
     return (
         <div className="space-y-4">
             <div className="p-4 bg-purple-50 rounded-xl text-sm text-purple-700 border border-purple-200">
-                <strong>🅰️ Assist Manager:</strong> Update assists for each player. Select a team to filter or view all players.
+                <strong>🅰️ Assist Manager:</strong> Update assists for each player. Use +/- buttons or click the number to set a specific value.
             </div>
 
             {/* Team Filter */}
@@ -857,8 +879,40 @@ function AssistManager({ players, teams, onAssistUpdate }) {
                                 -
                             </button>
                             <div className="text-center">
-                                <span className="text-2xl font-bold text-gray-900">{player.assists || 0}</span>
-                                <p className="text-xs text-gray-500">Assists</p>
+                                {editingPlayer === player._id ? (
+                                    <div className="flex items-center gap-1">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            className="w-14 px-1 py-1 text-center font-bold border border-primary-300 rounded-lg focus:outline-none focus:border-primary-500 text-lg"
+                                            value={editValue}
+                                            onChange={(e) => setEditValue(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') handleDirectSet(player._id);
+                                                if (e.key === 'Escape') { setEditingPlayer(null); setEditValue(''); }
+                                            }}
+                                            autoFocus
+                                        />
+                                        <button
+                                            onClick={() => handleDirectSet(player._id)}
+                                            className="px-2 py-1 bg-primary-500 text-white text-xs rounded-lg hover:bg-primary-600"
+                                        >
+                                            ✓
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            setEditingPlayer(player._id);
+                                            setEditValue(String(player.assists || 0));
+                                        }}
+                                        className="cursor-pointer hover:bg-gray-100 rounded-lg px-2 py-1 transition-colors"
+                                        title="Click to set a specific number"
+                                    >
+                                        <span className="text-2xl font-bold text-gray-900">{player.assists || 0}</span>
+                                        <p className="text-xs text-gray-500">Assists</p>
+                                    </button>
+                                )}
                             </div>
                             <button
                                 onClick={() => onAssistUpdate(player._id, 1)}
