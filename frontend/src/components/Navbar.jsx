@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import logo from '../assets/logo.jpeg';
 
 function Navbar() {
     const location = useLocation();
@@ -21,9 +22,7 @@ function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow">
-                            <span className="text-white font-display font-bold text-sm">TSL</span>
-                        </div>
+                        <img src={logo} alt="TSL Logo" className="w-10 h-10 rounded-full object-cover shadow-md group-hover:shadow-glow transition-shadow" />
                         <div className="hidden sm:block">
                             <span className="font-display font-bold text-xl text-gray-900">Thekkinkad</span>
                             <span className="font-display font-bold text-xl text-primary-500 ml-1">Super League</span>

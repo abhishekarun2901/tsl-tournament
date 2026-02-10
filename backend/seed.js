@@ -13,6 +13,7 @@ const teamsData = [
         pool: 'A',
         logo: '',
         players: [
+            { name: 'Afreen', department: 'ME', isCaptain: true },
             { name: 'Karthik Krishna U', department: 'ME', isGoalkeeper: true },
             { name: 'Aswin Raj K', department: 'ME' },
             { name: 'Adhithyan Ramesh', department: 'EC' },
@@ -29,6 +30,7 @@ const teamsData = [
         pool: 'A',
         logo: '',
         players: [
+            { name: 'Harisankar', department: 'ME', isCaptain: true },
             { name: 'Vishnu S', department: 'EE' },
             { name: 'Rejith R', department: 'EE' },
             { name: 'Sanjay S', department: 'ME' },
@@ -45,6 +47,7 @@ const teamsData = [
         pool: 'A',
         logo: '',
         players: [
+            { name: 'Habeen', department: 'ME', isCaptain: true },
             { name: 'S Amrudhesh', department: 'IC' },
             { name: 'Adithyan VP', department: 'EC' },
             { name: 'Sidharth M Pillai', department: 'EC' },
@@ -61,6 +64,7 @@ const teamsData = [
         pool: 'A',
         logo: '',
         players: [
+            { name: 'Dhayanand', department: 'ME', isCaptain: true },
             { name: 'Niranjan', department: 'ME', isGoalkeeper: true },
             { name: 'Rajeeb', department: 'CE' },
             { name: 'Akash Vijayan', department: 'ME' },
@@ -78,6 +82,7 @@ const teamsData = [
         pool: 'B',
         logo: '',
         players: [
+            { name: 'Amal', department: 'ME', isCaptain: true },
             { name: 'Sreekuttan', department: 'ME' },
             { name: 'Rameel', department: 'ME' },
             { name: 'Darren Thomas', department: 'ME' },
@@ -94,6 +99,7 @@ const teamsData = [
         pool: 'B',
         logo: '',
         players: [
+            { name: 'Sriram', department: 'ME', isCaptain: true },
             { name: 'Abhishek M Pillai', department: 'EC' },
             { name: 'Ahammed Najjad', department: 'ME' },
             { name: 'Anand', department: 'ME' },
@@ -110,6 +116,7 @@ const teamsData = [
         pool: 'B',
         logo: '',
         players: [
+            { name: 'Arun Prakash', department: 'ME', isCaptain: true },
             { name: 'Abhishek MS', department: 'CSE' },
             { name: 'Nayanjith', department: 'CSE' },
             { name: 'Chithu', department: 'IC' },
@@ -126,6 +133,7 @@ const teamsData = [
         pool: 'B',
         logo: '',
         players: [
+            { name: 'Vishnu', department: 'ME', isCaptain: true },
             { name: 'Abay P', department: 'EE' },
             { name: 'Viswajith K B', department: 'IC' },
             { name: 'Mashur Pul', department: 'CE' },
@@ -188,6 +196,7 @@ async function seed() {
                     department: playerData.department,
                     jerseyNumber: i + 1,
                     goals: 0,
+                    assists: 0,
                     isGoalkeeper: playerData.isGoalkeeper || false,
                     cleanSheets: 0
                 });
@@ -208,12 +217,10 @@ async function seed() {
             });
             await standing.save();
 
-            console.log(`  ✅ Created team: ${team.name}`);
+            console.log(`  ✅ Created team: ${team.name} (${teamData.players.length} players incl. captain)`);
         }
 
         // Create fixtures - Day 1 matches
-        // Match starts at 6:45 PM (18:45), 15 min intervals
-        // Tournament date is 2 days from now
         console.log('📅 Creating fixtures (Day 1)...');
 
         const matchDate = new Date();
