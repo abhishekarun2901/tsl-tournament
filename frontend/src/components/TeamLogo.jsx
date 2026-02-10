@@ -1,3 +1,23 @@
+import arsenalLogo from '../assets/arsenal.jpeg';
+import fiorentinaLogo from '../assets/fiorentia.jpeg';
+import forcaLogo from '../assets/forca.jpeg';
+import interLogo from '../assets/inter.jpeg';
+import lazioLogo from '../assets/lazio.jpeg';
+import liverpoolLogo from '../assets/liverpool.jpeg';
+import monacoLogo from '../assets/monaco.jpeg';
+import saoLogo from '../assets/sao.jpeg';
+
+const teamLogos = {
+    'Liverpool FC': liverpoolLogo,
+    'Inter Milan': interLogo,
+    'Fiorentina': fiorentinaLogo,
+    'Lazio': lazioLogo,
+    'Arsenal': arsenalLogo,
+    'Força FC': forcaLogo,
+    'São Paulo FC': saoLogo,
+    'AS Monaco': monacoLogo
+};
+
 function TeamLogo({ team, size = 'md', className = '' }) {
     const sizeClasses = {
         xs: 'w-6 h-6 text-xs',
@@ -16,6 +36,19 @@ function TeamLogo({ team, size = 'md', className = '' }) {
         return name.substring(0, 2).toUpperCase();
     };
 
+    // Check for local logo first, then team.logo from DB
+    const logoSrc = teamLogos[team?.name] || team?.logo;
+
+    if (logoSrc) {
+        return (
+            <img
+                src={logoSrc}
+                alt={team?.name}
+                className={`${sizeClasses[size]} rounded-full object-cover shadow-md ${className}`}
+            />
+        );
+    }
+
     const getTeamColor = (name) => {
         const colors = {
             'Liverpool FC': 'from-red-500 to-red-600',
@@ -29,16 +62,6 @@ function TeamLogo({ team, size = 'md', className = '' }) {
         };
         return colors[name] || 'from-gray-500 to-gray-600';
     };
-
-    if (team?.logo) {
-        return (
-            <img
-                src={team.logo}
-                alt={team.name}
-                className={`${sizeClasses[size]} rounded-full object-cover shadow-md ${className}`}
-            />
-        );
-    }
 
     return (
         <div
