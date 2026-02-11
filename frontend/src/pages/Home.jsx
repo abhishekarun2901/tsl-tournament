@@ -105,7 +105,7 @@ function Home() {
                     <section>
                         <div className="flex items-center gap-4 mb-6">
                             <div className="bg-gradient-to-r from-secondary-500 to-secondary-600 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg shadow-secondary-500/30">
-                                DAY 1
+                                DAY 2
                             </div>
                             <h2 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
                                 Match Schedule
@@ -161,8 +161,8 @@ function Home() {
                                 <span className="font-bold text-primary-400">8</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-400">Day 1 Matches</span>
-                                <span className="font-bold text-primary-400">9</span>
+                                <span className="text-gray-400">Day 2 Matches</span>
+                                <span className="font-bold text-primary-400">6</span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-400">Kickoff</span>

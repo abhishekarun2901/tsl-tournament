@@ -55,7 +55,7 @@ function Fixtures() {
                     </span>
                 </h1>
                 <p className="text-gray-600 text-lg">
-                    Day 1 Schedule • 9 Matches • Starting 6:45 PM
+                    Day 2 Schedule • 6 Matches • Starting 6:45 PM
                 </p>
             </section>
 
@@ -71,8 +71,8 @@ function Fixtures() {
                         key={tab.key}
                         onClick={() => setFilter(tab.key)}
                         className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${filter === tab.key
-                                ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg shadow-primary-500/30'
-                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                            ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg shadow-primary-500/30'
+                            : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
                             }`}
                     >
                         {tab.key === 'live' && tab.count > 0 && (
@@ -80,8 +80,8 @@ function Fixtures() {
                         )}
                         {tab.label}
                         <span className={`text-xs px-2 py-0.5 rounded-full ${filter === tab.key
-                                ? 'bg-white/20'
-                                : 'bg-gray-100'
+                            ? 'bg-white/20'
+                            : 'bg-gray-100'
                             }`}>
                             {tab.count}
                         </span>
