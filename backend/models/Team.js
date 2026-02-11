@@ -20,7 +20,7 @@ const teamSchema = new mongoose.Schema({
     },
     pool: {
         type: String,
-        enum: ['A', 'B'],
+        enum: ['A', 'B', 'N/A'],
         required: true
     }
 }, {
