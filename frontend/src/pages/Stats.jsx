@@ -50,8 +50,15 @@ function Stats() {
 
     const tabs = [
         { id: 'scorers', label: '⚽ Top Scorers', count: scorers.length },
-        { id: 'assists', label: '🅰️ Top Assists', count: assisters.length },
     ];
+
+    if (settings.showTopAssists !== false) { // Default to true if undefined
+        tabs.push({ id: 'assists', label: '🅰️ Top Assists', count: assisters.length });
+    }
+
+    if (settings.showTopGoalkeepers !== false) {
+        tabs.push({ id: 'goalkeepers', label: '🧤 Best Goalkeepers', count: sortedKeepers.length });
+    }
 
     if (showAwards) {
         tabs.push({ id: 'awards', label: '🏆 Awards', count: null });
@@ -78,8 +85,8 @@ function Stats() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-2 ${activeTab === tab.id
-                                ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
-                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                            ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
+                            : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                             }`}
                     >
                         {tab.label}
@@ -126,6 +133,25 @@ function Stats() {
                             valueKey="assists"
                             label="Assists"
                             emoji="🅰️"
+                        />
+                    )}
+                </div>
+            )}
+
+            {/* Top Goalkeepers Tab */}
+            {activeTab === 'goalkeepers' && (
+                <div>
+                    {sortedKeepers.length === 0 ? (
+                        <div className="card p-12 text-center">
+                            <div className="text-6xl mb-4">🧤</div>
+                            <p className="text-gray-500 text-lg">No clean sheets recorded yet</p>
+                        </div>
+                    ) : (
+                        <StatsTable
+                            data={sortedKeepers}
+                            valueKey="cleanSheets"
+                            label="Clean Sheets"
+                            emoji="🧤"
                         />
                     )}
                 </div>
@@ -203,9 +229,9 @@ function StatsTable({ data, valueKey, label, emoji }) {
                         <tr key={player._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                             <td className="px-4 py-3">
                                 <span className={`inline-flex items-center justify-center w-8 h-8 font-bold rounded-full text-sm ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                                        index === 1 ? 'bg-gray-200 text-gray-700' :
-                                            index === 2 ? 'bg-orange-100 text-orange-700' :
-                                                'bg-gray-100 text-gray-600'
+                                    index === 1 ? 'bg-gray-200 text-gray-700' :
+                                        index === 2 ? 'bg-orange-100 text-orange-700' :
+                                            'bg-gray-100 text-gray-600'
                                     }`}>
                                     {index + 1}
                                 </span>

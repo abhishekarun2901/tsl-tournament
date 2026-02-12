@@ -98,8 +98,8 @@ function Fixtures() {
 
                         return (
                             <div key={match._id}>
-                                {/* Semi-final Heading - 4th match (index 3) */}
-                                {originalIndex === 3 && (
+                                {/* Semi-final Heading - Match 13 (index 12) */}
+                                {originalIndex === 12 && (
                                     <div className="text-center mt-12 mb-6 animate-fade-in-up">
                                         <h2 className="font-display text-3xl font-bold">
                                             <span className="bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
@@ -110,8 +110,8 @@ function Fixtures() {
                                     </div>
                                 )}
 
-                                {/* Semi-final Heading - 5th match (index 4) */}
-                                {originalIndex === 4 && (
+                                {/* Semi-final Heading - Match 14 (index 13) */}
+                                {originalIndex === 13 && (
                                     <div className="text-center mt-12 mb-6 animate-fade-in-up">
                                         <h2 className="font-display text-3xl font-bold">
                                             <span className="bg-gradient-to-r from-primary-600 to-secondary-500 bg-clip-text text-transparent">
@@ -122,8 +122,8 @@ function Fixtures() {
                                     </div>
                                 )}
 
-                                {/* Final Heading - 6th match (index 5) */}
-                                {originalIndex === 5 && (
+                                {/* Final Heading - Match 15 (index 14) */}
+                                {originalIndex === 14 && (
                                     <div className="text-center mt-16 mb-8 animate-fade-in-up">
                                         <div className="flex items-center justify-center gap-4 mb-2">
                                             <span className="text-4xl">🏆</span>

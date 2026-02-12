@@ -43,6 +43,12 @@ router.put('/settings', async (req, res) => {
         if (goldenBallPlayer !== undefined) {
             await Settings.setSetting('goldenBallPlayer', goldenBallPlayer);
         }
+        if (req.body.showTopAssists !== undefined) {
+            await Settings.setSetting('showTopAssists', req.body.showTopAssists);
+        }
+        if (req.body.showTopGoalkeepers !== undefined) {
+            await Settings.setSetting('showTopGoalkeepers', req.body.showTopGoalkeepers);
+        }
 
         const settings = await Settings.getSettings();
         res.json(settings);

@@ -321,6 +321,48 @@ function UpdateTournament() {
                                     }`} />
                             </button>
                         </div>
+
+                        {/* Visibility Controls */}
+                        <div className="pt-4 border-t border-gray-100">
+                            <h3 className="font-bold text-gray-900 mb-3">Stats Page Visibility</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">🅰️</span>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900">Show Top Assists</h3>
+                                            <p className="text-sm text-gray-600">Show assists leaderboard tab</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleSettingsUpdate('showTopAssists', settings.showTopAssists !== false ? false : true)} // Toggle logic for undefined = true
+                                        className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${settings.showTopAssists !== false ? 'bg-green-500' : 'bg-gray-300'
+                                            }`}
+                                    >
+                                        <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${settings.showTopAssists !== false ? 'translate-x-7' : 'translate-x-1'
+                                            }`} />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">🧤</span>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900">Show Top Goalkeepers</h3>
+                                            <p className="text-sm text-gray-600">Show clean sheets leaderboard tab</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleSettingsUpdate('showTopGoalkeepers', settings.showTopGoalkeepers !== false ? false : true)}
+                                        className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${settings.showTopGoalkeepers !== false ? 'bg-green-500' : 'bg-gray-300'
+                                            }`}
+                                    >
+                                        <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${settings.showTopGoalkeepers !== false ? 'translate-x-7' : 'translate-x-1'
+                                            }`} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="p-4 bg-gray-50 rounded-xl text-sm text-gray-600">
